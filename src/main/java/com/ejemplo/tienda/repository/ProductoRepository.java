@@ -1,13 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.ejemplo.tienda.repository;
 
-/**
- *
- * @author rodri
- */
-public class ProductoRepository {
-    
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.ejemplo.tienda.model.Producto;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ProductoRepository extends JpaRepository<Producto, Long> {
+    // Spring Data JPA ya nos da métodos como save, findAll, findById, deleteById
 }
