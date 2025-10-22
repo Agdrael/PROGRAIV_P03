@@ -1,16 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.ejemplo.tienda;
 
-/**
- *
- * @author rodri
- */
-public class Tienda {
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
+public class Tienda {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        SpringApplication.run(Tienda.class, args);
     }
 }
