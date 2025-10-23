@@ -42,5 +42,21 @@ public class ProductoService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no existe: " + id);
         }
     }
+    
+    // método para agregar Producto a la base de datos
+    public void crearProducto(Producto producto) {
+        try {
+            productoRepository.getTransaction().begin();
+            productoRepository.persist();
+            productoRepository.getTransaction().commit();
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al crear el producto: " + e.getMessage(), e);
+        }
+    }
+
+/*
+
 
 }
