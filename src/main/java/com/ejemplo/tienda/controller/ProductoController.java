@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/springframework/RestController.java to edit this template
  */
-
 package com.ejemplo.tienda.controller;
 
 import com.ejemplo.tienda.model.Producto;
@@ -11,13 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
 /**
  *
  * @author jairo
  */
 @RestController
 @RequestMapping("/api/productos")
-public class ProductoController{
+public class ProductoController {
 
     private final ProductoService productoService;
 
@@ -25,7 +25,8 @@ public class ProductoController{
     public ProductoController(ProductoService productoService) {
         this.productoService = productoService;
     }
-     // GET: listar todos
+    // GET: listar todos
+
     @GetMapping
     public List<Producto> listarProductos() {
         return productoService.listarProductos();
@@ -36,11 +37,23 @@ public class ProductoController{
     public Optional<Producto> obtenerUsuario(@PathVariable Long id) {
         return productoService.obtenerProductoPorId(id);
     }
-    
-     // DELETE: eliminar usuario
+
+    // DELETE: eliminar usuario
     @DeleteMapping("/{id}")
     public String eliminarProducto(@PathVariable Long id) {
         productoService.eliminarProducto(id);
         return "Producto eliminado con éxito.";
+    }
+    // POST: crear producto
+
+    @PostMapping
+    public Producto crearProducto(@RequestBody Producto producto) {
+        return productoService.crearProducto(producto);
+    }
+
+// PUT: actualizar producto
+    @PutMapping("/{id}")
+    public Producto actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
+        return productoService.actualizarProducto(id, producto);
     }
 }
