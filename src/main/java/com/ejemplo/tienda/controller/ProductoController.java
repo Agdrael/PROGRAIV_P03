@@ -1,59 +1,57 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/springframework/RestController.java to edit this template
- */
 package com.ejemplo.tienda.controller;
 
 import com.ejemplo.tienda.model.Producto;
 import com.ejemplo.tienda.service.ProductoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
-/**
- *
- * @author jairo
- */
 @RestController
 @RequestMapping("/api/productos")
+@CrossOrigin(origins = "*") // Permitir fetch() desde el front
 public class ProductoController {
 
-    private final ProductoService productoService;
-
-    // Inyección de dependencias por constructor
-    public ProductoController(ProductoService productoService) {
-        this.productoService = productoService;
-    }
-    // GET: listar todos
+    @Autowired
+    private ProductoService productoService;
 
     @GetMapping
-    public List<Producto> listarProductos() {
-        return productoService.listarProductos();
+    public List<Producto> listar() {
+        return productoService.listar();
     }
 
-    // GET: buscar por ID
     @GetMapping("/{id}")
-    public Optional<Producto> obtenerUsuario(@PathVariable Long id) {
-        return productoService.obtenerProductoPorId(id);
+    public ResponseEntity<Producto> obtenerPorId(@PathVariable Integer id) {
+        Producto producto = productoService.buscarPorId(id);
+        if (producto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(producto);
     }
-
-    // DELETE: eliminar usuario
-    @DeleteMapping("/{id}")
-    public String eliminarProducto(@PathVariable Long id) {
-        productoService.eliminarProducto(id);
-        return "Producto eliminado con éxito.";
-    }
-    // POST: crear producto
 
     @PostMapping
-    public Producto crearProducto(@RequestBody Producto producto) {
-        return productoService.crearProducto(producto);
+    public Producto crear(@RequestBody Producto producto) {
+        return productoService.crear(producto);
     }
 
-// PUT: actualizar producto
     @PutMapping("/{id}")
-    public Producto actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
-        return productoService.actualizarProducto(id, producto);
+    public ResponseEntity<Producto> actualizar(@PathVariable Integer id, @RequestBody Producto producto) {
+        try {
+            Producto actualizado = productoService.actualizar(id, producto);
+            return ResponseEntity.ok(actualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+        try {
+            productoService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

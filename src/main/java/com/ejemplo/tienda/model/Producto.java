@@ -9,7 +9,7 @@ public class Producto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     private String nombre;
     private String sku;
     private String descripcion;
@@ -23,7 +23,7 @@ public class Producto {
     }
 
     // Constructor con parámetros
-    public Producto(long id, String nombre, String sku, String descripcion, double precio, LocalDate vencimiento, String categoria) {
+    public Producto(int id, String nombre, String sku, String descripcion, double precio, LocalDate vencimiento, String categoria) {
         this.id = id;
         this.nombre = nombre;
         this.sku = sku;
@@ -34,11 +34,11 @@ public class Producto {
     }
 
     //metodos get y set 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

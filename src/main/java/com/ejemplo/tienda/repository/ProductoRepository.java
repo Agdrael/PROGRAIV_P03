@@ -5,6 +5,6 @@ import com.ejemplo.tienda.model.Producto;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductoRepository extends JpaRepository<Producto, Long> {
+public interface ProductoRepository extends JpaRepository<Producto, Integer> {
     // Spring Data JPA ya nos da métodos como save, findAll, findById, deleteById
 }
