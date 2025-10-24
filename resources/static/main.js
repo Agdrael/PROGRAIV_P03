@@ -1,77 +1,133 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Other/javascript.js to edit this template
- */
-let editingIndex = -1;
-const form = document.getElementById('product-form');
-const tableBody = document.querySelector('#product-table tbody');
-const submitBtn = document.getElementById('submit-btn');
+// URL base del backend Spring Boot
+const API_URL = "http://localhost:8080/api/productos";
 
-form.addEventListener('submit', function (e) {
+let editingId = null;
+const form = document.getElementById("product-form");
+const tableBody = document.querySelector("#product-table tbody");
+const submitBtn = document.getElementById("submit-btn");
+
+document.addEventListener("DOMContentLoaded", listarProductos);
+
+
+// Manejo del formulario
+form.addEventListener("submit", async function (e) {
     e.preventDefault();
-    const product = {
-        nombre: document.getElementById('nombre').value,
-        sku: document.getElementById('sku').value,
-        descripcion: document.getElementById('descripcion').value,
-        precio: document.getElementById('precio').value,
-        vencimiento: document.getElementById('vencimiento').value,
-        categoria: document.getElementById('categoria').value
+
+    const producto = {
+        nombre: document.getElementById("nombre").value.trim(),
+        sku: document.getElementById("sku").value.trim(),
+        descripcion: document.getElementById("descripcion").value.trim(),
+        precio: parseFloat(document.getElementById("precio").value),
+        vencimiento: document.getElementById("vencimiento").value,
+        categoria: document.getElementById("categoria").value
     };
 
-    if (editingIndex === -1) {
-        addProduct(product);
-    } else {
-        updateProduct(editingIndex, product);
-        editingIndex = -1;
-        submitBtn.textContent = 'Crear Producto';
+    if (!producto.nombre || !producto.sku || !producto.descripcion ||
+        !producto.precio || !producto.vencimiento || !producto.categoria) {
+        alert("completa todos los campos antes de enviar");
+        return;
     }
 
-    form.reset();
+    try {
+        if (editingId === null) {
+            await crearProducto(producto);
+        } else {
+            await actualizarProducto(editingId, producto);
+            editingId = null;
+            submitBtn.textContent = "Crear Producto";
+        }
+        form.reset();
+        listarProductos();
+    } catch (err) {
+        console.error("Error al guardar producto:", err);
+        alert("error al guardar el producto.");
+    }
 });
 
-function addProduct(product) {
-    const row = createRow(product);
-    tableBody.appendChild(row);
+
+// CRUD API
+
+async function listarProductos() {
+    try {
+        const res = await fetch(API_URL);
+        const productos = await res.json();
+        renderTabla(productos);
+    } catch (err) {
+        console.error("Error al listar productos:", err);
+        alert("No se pudo cargar la lista de productos");
+    }
 }
 
-function updateProduct(index, product) {
-    const rows = tableBody.querySelectorAll('tr');
-    const row = createRow(product);
-    tableBody.replaceChild(row, rows[index]);
+async function crearProducto(producto) {
+    await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(producto)
+    });
 }
 
-function createRow(product) {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-                <td>${product.nombre}</td>
-                <td>${product.sku}</td>
-                <td>${product.descripcion}</td>
-                <td>$${product.precio}</td>
-                <td>${product.vencimiento}</td>
-                <td>${product.categoria}</td>
-                <td class="actions">
-                    <button class="edit-btn" onclick="editProduct(this)">Editar</button>
-                    <button class="delete-btn" onclick="deleteProduct(this)">Eliminar</button>
-                </td>
-            `;
-    return row;
+async function actualizarProducto(id, producto) {
+    await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(producto)
+    });
 }
 
-function editProduct(btn) {
-    const row = btn.closest('tr');
-    const cells = row.querySelectorAll('td');
-    document.getElementById('nombre').value = cells[0].textContent;
-    document.getElementById('sku').value = cells[1].textContent;
-    document.getElementById('descripcion').value = cells[2].textContent;
-    document.getElementById('precio').value = cells[3].textContent.replace('$', '');
-    document.getElementById('vencimiento').value = cells[4].textContent;
-    document.getElementById('categoria').value = cells[5].textContent;
-    editingIndex = Array.from(tableBody.children).indexOf(row);
-    submitBtn.textContent = 'Actualizar Producto';
+async function eliminarProducto(id) {
+    if (!confirm("Seguro que deseas eliminar este producto?")) return;
+
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    listarProductos();
 }
 
-function deleteProduct(btn) {
-    const row = btn.closest('tr');
-    tableBody.removeChild(row);
+// Renderizado de la tabla
+function renderTabla(productos) {
+    tableBody.innerHTML = "";
+
+    if (productos.length === 0) {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `<td colspan="7" class="text-center">No hay productos registrados</td>`;
+        tableBody.appendChild(fila);
+        return;
+    }
+
+    productos.forEach(producto => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${producto.nombre}</td>
+            <td>${producto.sku}</td>
+            <td>${producto.descripcion}</td>
+            <td>$${producto.precio.toFixed(2)}</td>
+            <td>${producto.vencimiento}</td>
+            <td>${producto.categoria}</td>
+            <td class="actions">
+                <button class="edit-btn" onclick="editarProducto(${producto.id})">Editar</button>
+                <button class="delete-btn" onclick="eliminarProducto(${producto.id})">Eliminar</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
 }
 
+// Editar
+
+async function editarProducto(id) {
+    try {
+        const res = await fetch(`${API_URL}/${id}`);
+        const producto = await res.json();
+
+        document.getElementById("nombre").value = producto.nombre;
+        document.getElementById("sku").value = producto.sku;
+        document.getElementById("descripcion").value = producto.descripcion;
+        document.getElementById("precio").value = producto.precio;
+        document.getElementById("vencimiento").value = producto.vencimiento;
+        document.getElementById("categoria").value = producto.categoria;
+
+        editingId = id;
+        submitBtn.textContent = "Actualizar Producto";
+    } catch (err) {
+        console.error("Error al editar producto:", err);
+        alert("No se pudo cargar la informacion del producto");
+    }
+}
